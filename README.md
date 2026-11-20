@@ -1,76 +1,73 @@
 # Modul Kalkulator Indeks Prestasi (IP) Mahasiswa
 
-Simulasi **Debugging, Error Handling, dan Automated Testing** untuk Pertemuan 16.
-Dibuat dengan Laravel 13 dan database **MySQL** agar data dapat dipantau melalui phpMyAdmin.
+Modul Laravel untuk menghitung **Indeks Prestasi (IP) semester** mahasiswa dari total mutu dan total SKS, lengkap dengan predikat, kuota SKS semester berikutnya, dan penanganan error.
 
-**Watermark / Pemilik Proyek:** Rifkillah Muliya Al-Faris
+## Fitur
 
-- Panel pengujian: `/uji-nilai`
-- Perhitungan normal: `/uji-nilai/hitung/2410114001`
-- Skenario exception: `/uji-nilai/hitung/2410114003`
-- Skenario 404: `/uji-nilai/hitung/99999999`
-- Debug `dd()`: `/uji-nilai/hitung/2410114001?debug=1`
+- Menampilkan daftar mahasiswa beserta tombol hitung IP.
+- Menghitung IP dengan rumus `total_mutu / total_sks`.
+- Predikat otomatis: Dengan Pujian (≥ 3.50), Sangat Memuaskan (≥ 3.00), Memuaskan (≥ 2.50), Cukup (≥ 2.00), Perlu Perbaikan (< 2.00).
+- Kuota SKS semester depan: 24 SKS bila IP ≥ 3.00, selain itu 20 SKS.
+- Penanganan error: pembagian dengan nol (mahasiswa baru), nilai negatif, dan IP melebihi 4.00.
+- Halaman error 404 dan 500 kustom serta watermark pemilik sistem.
+- Unit test logika perhitungan (`tests/Unit/KalkulatorIpServiceTest.php`) dan feature test.
 
-Jalankan `php artisan migrate --seed`, lalu `php artisan serve`.
-Laporan lengkap tersedia di [`LAPORAN_PENGUJIAN.md`](LAPORAN_PENGUJIAN.md).
+## Teknologi
 
----
+- PHP 8.3+
+- Laravel
+- Blade Template
+- MySQL
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Instalasi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+1. Buat basis data MySQL:
 
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```sql
+CREATE DATABASE db_kalkulator_ip;
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. Jalankan:
 
-## Contributing
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` pada `.env` bila perlu.
+Buka http://localhost:8000 (otomatis diarahkan ke `/uji-nilai`).
 
-## Code of Conduct
+## Data Demo (hasil seeder)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| NIM | Nama | Total Mutu | Total SKS |
+|---|---|---|---|
+| 2410114001 | Rizky Pratama | 76 | 20 |
+| 2410114002 | Siti Nabila | 78 | 20 |
+| 2410114003 | Budi Hartono (Mahasiswa Baru) | 0 | 0 |
 
-## Security Vulnerabilities
+NIM ketiga sengaja memiliki 0 SKS untuk menguji penanganan pembagian dengan nol.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Route
 
-## License
+| Method | URI | Keterangan |
+|---|---|---|
+| GET | `/` | Redirect ke `/uji-nilai` |
+| GET | `/uji-nilai` | Daftar mahasiswa |
+| GET | `/uji-nilai/hitung/{nim}` | Hasil perhitungan IP |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Pengujian
+
+```bash
+php artisan test
+```
+
+> `phpunit.xml` memakai database `db_kalkulator_ip_test`; pastikan database tersebut tersedia.
+
+## Struktur Penting
+
+- `app/Services/KalkulatorIpService.php` — logika perhitungan, predikat, dan kuota SKS.
+- `app/Http/Controllers/NilaiAkademikController.php` — alur halaman dan validasi data.
+- `app/Models/Mahasiswa.php`, `Pengaturan.php` — data mahasiswa dan pengaturan aplikasi.
